@@ -1,12 +1,6 @@
 import Image from "next/image";
 import React from "react";
-
-interface ProfileProps {
-  name: string;
-  avatarUrl: string;
-  location: string;
-  bio: string;
-}
+import { ProfileProps } from "../types";
 
 export default function ProfileCard({
   name,

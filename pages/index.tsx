@@ -49,8 +49,14 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+        <h1 className="text-3xl x my-4 ">
+          Welcome to{" "}
+          <a
+            href="https://developer.github.com/v3/search/"
+            className="text-blue-600"
+          >
+            Github user search!
+          </a>
         </h1>
 
         <form className="m-4 flex" onSubmit={handleSubmit}>
@@ -154,7 +160,7 @@ const Home: NextPage = () => {
 
         <section className="flex items-center justify-center flex-wrap">
           {data &&
-            data.search.edges.map((item) => (
+            data.search.edges.map((item: any) => (
               <ProfileCard
                 key={item.node.id}
                 name={item.node.name}
