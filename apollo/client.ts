@@ -13,8 +13,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: 'Bearer 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' 
-     // authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN}` 
+      authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN}` 
     }
   }
 });
