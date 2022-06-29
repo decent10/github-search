@@ -18,6 +18,7 @@ export const GET_USER_SEARCH = gql`
                     email
                     name
                     avatarUrl
+                    url
                     bio
                     location
                 }
