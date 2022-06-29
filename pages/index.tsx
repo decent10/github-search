@@ -1,20 +1,22 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
-import { useLazyQuery, useQuery } from "@apollo/client";
-import { GET_USER_SEARCH } from "../apollo/queries/search";
 import { InView } from "react-intersection-observer";
+import { useLazyQuery } from "@apollo/client";
+
+import { GET_USER_SEARCH } from "../apollo/queries/search";
 import ProfileCard from "../components/ProfileCard";
 import SearchForm from "../components/SearchFrom";
+import Skeleton from "../components/Skeleton";
+import Loading from "../components/Loading";
+import Footer from "../components/Footer";
 
 const PAGE_SIZE = 6;
 
 const Home: NextPage = () => {
   const [query, setQuery] = useState<string>("");
   const [isFetchMore, setIsFetchMore] = useState(true);
-  const [runSearchQuery, { called, loading, data, fetchMore }] = useLazyQuery(
+  const [runSearchQuery, { loading, data, fetchMore }] = useLazyQuery(
     GET_USER_SEARCH,
     {
       variables: {
@@ -27,6 +29,24 @@ const Home: NextPage = () => {
     if (data) setIsFetchMore(data.search.pageInfo.hasNextPage);
   }, [data]);
 
+  const loadMoreUsers = () => {
+    const { endCursor } = data.search.pageInfo;
+    if (!isFetchMore) return;
+
+    fetchMore({
+      variables: { after: endCursor },
+      updateQuery: (prevResult, { fetchMoreResult }) => {
+        setIsFetchMore(fetchMoreResult.search.pageInfo.hasNextPage);
+        fetchMoreResult.search.edges = [
+          ...prevResult.search.edges,
+          ...fetchMoreResult.search.edges,
+        ];
+        fetchMoreResult.search.pageInfo = fetchMoreResult.search.pageInfo;
+        return fetchMoreResult;
+      },
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     runSearchQuery({
@@ -36,8 +56,9 @@ const Home: NextPage = () => {
       },
     });
   };
-  const handleSearch = (e) => {
-    setQuery(e.target.value);
+  const handleSearch = (e: React.FormEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value as string;
+    setQuery(value);
   };
 
   return (
@@ -65,15 +86,8 @@ const Home: NextPage = () => {
         />
 
         <section className="flex items-center justify-center flex-wrap">
-          {/* {data && (
-            <p className="text-sm text-slate-500">
-              <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-sky-600 bg-sky-200 uppercase last:mr-0 mr-1">
-                {data.search.userCount}
-              </span>
-              user found
-            </p>
-          )} */}
-          {loading && <div>Loading.... </div>}
+          {data && data.search.edges.length === 0 && <Skeleton />}
+          {loading && <Loading />}
           {data &&
             data.search.edges.map((item: any) => (
               <ProfileCard
@@ -89,48 +103,14 @@ const Home: NextPage = () => {
             <InView
               onChange={async (inView) => {
                 if (inView) {
-                  const { endCursor } = data.search.pageInfo;
-                  console.log(
-                    data.search.pageInfo.hasNextPage,
-                    data.search.userCount,
-                    data.search.edges.length
-                  );
-                  if (!isFetchMore) return;
-                  fetchMore({
-                    variables: { after: endCursor },
-                    updateQuery: (prevResult, { fetchMoreResult }) => {
-                      setIsFetchMore(
-                        fetchMoreResult.search.pageInfo.hasNextPage
-                      );
-                      console.log(fetchMoreResult.search.pageInfo.hasNextPage);
-                      fetchMoreResult.search.edges = [
-                        ...prevResult.search.edges,
-                        ...fetchMoreResult.search.edges,
-                      ];
-                      fetchMoreResult.search.pageInfo =
-                        fetchMoreResult.search.pageInfo;
-                      return fetchMoreResult;
-                    },
-                  });
+                  loadMoreUsers();
                 }
               }}
             />
           )}
         </section>
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+      <Footer />
     </div>
   );
 };

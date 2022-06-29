@@ -75,7 +75,6 @@ export default function ProfileCard({
           {name ? name : "No name"}
         </motion.h3>
         <div className="text-xs mt-0 mb-2 text-slate-400 font-bold uppercase">
-          <i className="fas fa-map-marker-alt mr-2 text-slate-400 opacity-75" />
           {location}
         </div>
         <a
